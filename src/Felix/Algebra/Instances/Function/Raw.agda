@@ -1,9 +1,9 @@
 {-# OPTIONS --safe --without-K #-}
 
 open import Level
-  using (_⊔_; Level; Lift; lift)
+  using (0ℓ)
 
-module Felix.Algebra.Instances.Function.Raw (ℓ : Level) where
+module Felix.Algebra.Instances.Function.Raw where
 
 -- standard-library
 open import Data.Integer
@@ -13,143 +13,49 @@ open import Data.Nat
 open import Data.Rational
   as ℚ using ()
 open import Data.Product
-  using (_,_)
-open import Function
-  using (const)
+  using (uncurry′)
 
 -- felix
-open import Felix.Instances.Function ℓ
+open import Felix.Instances.Function 0ℓ
   as Fun
-open import Felix.Raw
-  using (_∘_; _×_; ⊤; uncurry)
+  using (_⇾_)
 
 -- felix-algebra
 open import Felix.Algebra.Raw
-  as Raw
-  hiding (*-monoid)
+  using (Operand; 𝕆; Magma; ⟨∙⟩)
 
-private
-  variable
-    A : Set
+module natural-instances where instance
+  open ℕ using (ℕ; _+_; _*_)
 
--- until it is available from felix, see
--- https://github.com/conal/felix/pull/5
-lift₀ : A → (⊤ ⇾ Lift ℓ A)
-lift₀ n tt = lift n
+  operand : Operand Set
+  operand = record { 𝕆 = ℕ }
 
-lift₁ : (A → A) → (Lift ℓ A ⇾ Lift ℓ A)
-lift₁ f (lift a) = lift (f a)
+  +-magma : Magma _⇾_
+  +-magma = record { ⟨∙⟩ = uncurry′ _+_ }
 
-lift₂′ : (A → A → A) → (Lift ℓ A ⇾ Lift ℓ A ⇾ Lift ℓ A)
-lift₂′ f (lift a) (lift b) = lift (f a b)
+  *-magma : Magma _⇾_
+  *-magma = record { ⟨∙⟩ = uncurry′ _*_ }
 
-lift₂ : (A → A → A) → (Lift ℓ A × Lift ℓ A ⇾ Lift ℓ A)
-lift₂ = uncurry Function.∘ lift₂′
+module integer-instances where instance
+  open ℤ using (ℤ; _+_; _*_)
 
-ℕ : Set ℓ
-ℕ = Lift ℓ ℕ.ℕ
+  operand : Operand Set
+  operand = record { 𝕆 = ℤ }
 
-ℤ : Set ℓ
-ℤ = Lift ℓ ℤ.ℤ
+  +-magma : Magma _⇾_
+  +-magma = record { ⟨∙⟩ = uncurry′ _+_ }
 
-ℚ : Set ℓ
-ℚ = Lift ℓ ℚ.ℚ
+  *-magma : Magma _⇾_
+  *-magma = record { ⟨∙⟩ = uncurry′ _*_ }
 
-module natural-raw-instances where instance
-  open ℕ using (_+_; _*_)
+module rational-instances where instance
+  open ℚ using (ℚ; _+_; _*_)
 
-  +-magma : Magma _+_ (const ℕ) _⇾_
-  +-magma = record { ⟨∙⟩ = lift₂ _+_ }
+  operand : Operand Set
+  operand = record { 𝕆 = ℚ }
 
-  *-magma : Magma _*_ (const ℕ) _⇾_
-  *-magma = record { ⟨∙⟩ = lift₂ _*_ }
+  +-magma : Magma _⇾_
+  +-magma = record { ⟨∙⟩ = uncurry′ _+_ }
 
-  +-semigroup : Semigroup _+_ (const ℕ) _⇾_
-  +-semigroup = record { }
-
-  *-semigroup : Semigroup _*_ (const ℕ) _⇾_
-  *-semigroup = record { }
-
-  +-unit : Element 0 (const ℕ) _⇾_
-  +-unit = record { ⟨ι⟩ = lift₀ 0 }
-
-  *-unit : Element 1 (const ℕ) _⇾_
-  *-unit = record { ⟨ι⟩ = lift₀ 1 }
-
-  +-0-monoid : Monoid _+_ 0 (const ℕ) _⇾_
-  +-0-monoid = record { }
-
-  *-1-monoid : Monoid _*_ 1 (const ℕ) _⇾_
-  *-1-monoid = record { }
-
-module integer-raw-instances where instance
-  open ℤ using (0ℤ; 1ℤ; _+_; _*_; -_)
-
-  +-magma : Magma _+_ (const ℤ) _⇾_
-  +-magma = record { ⟨∙⟩ = lift₂ _+_ }
-
-  *-magma : Magma _*_ (const ℤ) _⇾_
-  *-magma = record { ⟨∙⟩ = lift₂ _*_ }
-
-  +-semigroup : Semigroup _+_ (const ℤ) _⇾_
-  +-semigroup = record { }
-
-  *-semigroup : Semigroup _*_ (const ℤ) _⇾_
-  *-semigroup = record { }
-
-  +-unit : Element 0ℤ (const ℤ) _⇾_
-  +-unit = record { ⟨ι⟩ = lift₀ 0ℤ }
-
-  *-unit : Element 1ℤ (const ℤ) _⇾_
-  *-unit = record { ⟨ι⟩ = lift₀ 1ℤ }
-
-  +-0-monoid : Monoid _+_ 0ℤ (const ℤ) _⇾_
-  +-0-monoid = record { }
-
-  *-1-monoid : Monoid _*_ 1ℤ (const ℤ) _⇾_
-  *-1-monoid = record { }
-
-  +-inverse : Unary (-_) (const ℤ) _⇾_
-  +-inverse = record { ⟨f⟩ = lift₁ (-_) }
-
-  +-0-group : Group _+_ 0ℤ (-_) (const ℤ) _⇾_
-  +-0-group = record { }
-
-  +-*-ring : Ring _+_ _*_ (-_) 0ℤ 1ℤ (const ℤ) _⇾_
-  +-*-ring = record { }
-
-module rational-raw-instances where instance
-  open ℚ using (0ℚ; 1ℚ; _+_; _*_; -_)
-
-  +-magma : Magma _+_ (const ℚ) _⇾_
-  +-magma = record { ⟨∙⟩ = lift₂ _+_ }
-
-  *-magma : Magma _*_ (const ℚ) _⇾_
-  *-magma = record { ⟨∙⟩ = lift₂ _*_ }
-
-  +-semigroup : Semigroup _+_ (const ℚ) _⇾_
-  +-semigroup = record { }
-
-  *-semigroup : Semigroup _*_ (const ℚ) _⇾_
-  *-semigroup = record { }
-
-  +-unit : Element 0ℚ (const ℚ) _⇾_
-  +-unit = record { ⟨ι⟩ = lift₀ 0ℚ }
-
-  *-unit : Element 1ℚ (const ℚ) _⇾_
-  *-unit = record { ⟨ι⟩ = lift₀ 1ℚ }
-
-  +-0-monoid : Monoid _+_ 0ℚ (const ℚ) _⇾_
-  +-0-monoid = record { }
-
-  *-1-monoid : Monoid _*_ 1ℚ (const ℚ) _⇾_
-  *-1-monoid = record { }
-
-  +-inverse : Unary (-_) (const ℚ) _⇾_
-  +-inverse = record { ⟨f⟩ = lift₁ (-_) }
-
-  +-0-group : Group _+_ 0ℚ (-_) (const ℚ) _⇾_
-  +-0-group = record { }
-
-  +-*-ring : Ring _+_ _*_ (-_) 0ℚ 1ℚ (const ℚ) _⇾_
-  +-*-ring = record { }
+  *-magma : Magma _⇾_
+  *-magma = record { ⟨∙⟩ = uncurry′ _*_ }

@@ -1,11 +1,13 @@
 {-# OPTIONS --safe --without-K #-}
 
 open import Level
-  using (_⊔_; 0ℓ; Level; Lift; lift)
+  using (_⊔_; 0ℓ; Level)
 
-module Felix.Algebra.Instances.Function.Laws (ℓ : Level) where
+module Felix.Algebra.Instances.Function.Laws where
 
 -- standard-library
+open import Algebra.Structures
+  as Structures using ()
 open import Data.Integer
   as ℤ using ()
 open import Data.Integer.Properties
@@ -14,76 +16,70 @@ open import Data.Nat
   as ℕ using ()
 open import Data.Nat.Properties
   as ℕₚ using ()
+open import Data.Rational
+  as ℚ using ()
+open import Data.Rational.Properties
+  as ℚₚ using ()
 open import Data.Product
   using (_,_)
-open import Function
-  using (_∘′_; const)
-open import Relation.Binary.PropositionalEquality
-  using (module ≡-Reasoning; _≗_; cong₂; isEquivalence; refl)
 
 -- felix
+open import Felix.Instances.Function 0ℓ
+  as Fun
+  using (_⇾_)
 open import Felix.Raw
-  using (_∘_; _×_; ⊤; assocʳ; first; id; second; sub)
-open import Felix.Equiv
-  using (_≈_; module ≈-Reasoning)
+  using (_∘_; ⊤; assocʳ; first; id; second; sub)
 
 -- felix-algebra
 open import Felix.Algebra.Laws
   as Laws
--- open import Felix.Algebra.Instances.Function.Raw ℓ public
+open import Felix.Algebra.Instances.Function.Raw
+  as Raw using ()
 
-private
-  variable
-    A : Set
-
-module natural-laws-instances-0ℓ where
-  open ℕ using (_+_; _*_)
-
-  open import Felix.Instances.Function 0ℓ
-    as F0ℓ
-    renaming (_⇾_ to _0ℓ⇾_)
-  open import Felix.Instances.Function 0ℓ
-    as Fun
-  open import Felix.Algebra.Instances.Function.Raw 0ℓ
-    as R0ℓ
-
-  private
-    instance
-      +-isMagma′ = ℕₚ.+-isMagma
-      *-isMagma′ = ℕₚ.*-isMagma
-      +-isSemigroup′ = ℕₚ.+-isSemigroup
-      *-isSemigroup′ = ℕₚ.*-isSemigroup
+module natural-instances where
+  module raw-instances = Raw.natural-instances
 
   instance
-    +-magma : Magma _+_ (const ℕ) _0ℓ⇾_
-    +-magma = LawfulMagmaᶠ (const ℕ)
-
-    *-magma : Magma _*_ (const ℕ) _⇾_
-    *-magma = LawfulMagmaᶠ (const ℕ)
-
-    +-semigroup : Semigroup _+_ (const ℕ) _⇾_
+    +-semigroup : Semigroup _⇾_
     +-semigroup = record
-      { ⟨∙⟩-assoc = λ { ((lift p′ , lift q′) , lift r′) → {!assoc p′ q′ r′!} }
-      -- λ { {p} {q} {r} →
-      --     begin
-      --       sub (const ℕ) (assoc p q r) ∘′
-      --       lift₂ _+_ ∘′
-      --       first (lift₂ _+_)
-      --     ≡⟨⟩
-      --       id ∘′ lift₂ _+_ ∘′ first (lift₂ _+_)
-      --     ≡⟨ {!assoc p q r !} ⟩
-      --       lift₂ _+_ ∘′ second (lift₂ _+_) ∘′ assocʳ
-      --     ∎
-      --     }
-      }
-      where
-        open Structures.IsSemigroup +-isSemigroup′
-      --   open ≈-Reasoning
-      --   assoc′ : {p q r : ℕ.ℕ} →
-      --     sub (const ℕ) (assoc p q r) ∘ lift₂ _+_ ∘ first (lift₂ _+_) ≈
-      --     lift₂ _+_ ∘ second (lift₂ _+_) ∘ assocʳ
-      --   assoc′ {p} {q} {r} a = assoc (lift p) (lift q) (lift r)
+      { raw-magma = raw-instances.+-magma
+      ; ⟨∙⟩-assoc = λ ((a , b) , c) → ℕassoc a b c
+      } where ℕassoc = Structures.IsSemigroup.assoc ℕₚ.+-isSemigroup
 
-    -- *-semigroup : Semigroup _*_ (const ℕ) _⇾_
-    -- *-semigroup = record
-    --   { ⟨∙⟩-assoc = {!!} }
+    *-semigroup : Semigroup _⇾_
+    *-semigroup = record
+      { raw-magma = raw-instances.*-magma
+      ; ⟨∙⟩-assoc = λ ((a , b) , c) → ℕassoc a b c
+      } where ℕassoc = Structures.IsSemigroup.assoc ℕₚ.*-isSemigroup
+
+module integer-instances where
+  module raw-instances = Raw.integer-instances
+
+  instance
+    +-semigroup : Semigroup _⇾_
+    +-semigroup = record
+      { raw-magma = raw-instances.+-magma
+      ; ⟨∙⟩-assoc = λ ((a , b) , c) → ℕassoc a b c
+      } where ℕassoc = Structures.IsSemigroup.assoc ℤₚ.+-isSemigroup
+
+    *-semigroup : Semigroup _⇾_
+    *-semigroup = record
+      { raw-magma = raw-instances.*-magma
+      ; ⟨∙⟩-assoc = λ ((a , b) , c) → ℕassoc a b c
+      } where ℕassoc = Structures.IsSemigroup.assoc ℤₚ.*-isSemigroup
+
+module rational-instances where
+  module raw-instances = Raw.rational-instances
+
+  instance
+    +-semigroup : Semigroup _⇾_
+    +-semigroup = record
+      { raw-magma = raw-instances.+-magma
+      ; ⟨∙⟩-assoc = λ ((a , b) , c) → ℕassoc a b c
+      } where ℕassoc = Structures.IsSemigroup.assoc ℚₚ.+-isSemigroup
+
+    *-semigroup : Semigroup _⇾_
+    *-semigroup = record
+      { raw-magma = raw-instances.*-magma
+      ; ⟨∙⟩-assoc = λ ((a , b) , c) → ℕassoc a b c
+      } where ℕassoc = Structures.IsSemigroup.assoc ℚₚ.*-isSemigroup
