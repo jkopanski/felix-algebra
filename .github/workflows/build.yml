@@ -10,4 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@v24
-    - run:  nix build -L --show-trace
+    - uses: cachix/cachix-action@v12
+      with:
+        name: famisoft
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - run: nix develop --profile dev-shell -c true
+    - run: nix build -L --show-trace
