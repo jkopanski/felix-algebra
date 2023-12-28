@@ -2,35 +2,24 @@
   description = "Algebraic structures for use with Felix.";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs?ref=23.05";
-    utils.url = "github:numtide/flake-utils";
-    agda-stdlib = {
-      url = "github:jkopanski/agda-stdlib";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-    felix = {
-      url = "github:jkopanski/felix";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        utils.follows = "utils";
-        agda-stdlib.follows = "agda-stdlib";
-      };
-    };
+    felix.url = "github:conal/felix";
+    nixpkgs.follows = "felix/nixpkgs";
+    utils.follows = "felix/utils";
+    agda-stdlib-src.follows = "felix/agda-stdlib-src";
   };
 
-  outputs = { self, nixpkgs, utils, agda-stdlib, felix }:
+  outputs = { self, nixpkgs, utils, agda-stdlib-src, felix }:
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        standard-library = agda-stdlib.packages.${system}.default;
+        standard-library = pkgs.agdaPackages.standard-library.overrideAttrs (final: prev: {
+          version = "2.0";
+          src = agda-stdlib-src;
+        });
         felix-lib = felix.packages.${system}.default;
-        # felix-boolean-lib = felix-boolean.packages.${system}.default;
         agdaWithStandardLibrary = pkgs.agda.withPackages (p: [
           standard-library
           felix-lib
-          # felix-boolean-lib
         ]);
 
       in {
